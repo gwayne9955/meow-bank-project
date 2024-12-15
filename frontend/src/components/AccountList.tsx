@@ -10,6 +10,7 @@ import {
   Th,
   Thead,
   Tr,
+  useColorModeValue,
   useToast,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
@@ -24,6 +25,7 @@ import { UiMoney } from "./UiMoney";
 
 export const AccountList: React.FC = () => {
   const navigate = useNavigate();
+
   const toast = useToast();
   const [searchTerm, setSearchTerm] = useState<string>();
   const [debouncedSearch] = useDebounce(searchTerm, 300); // 300ms delay
@@ -81,6 +83,8 @@ export const AccountList: React.FC = () => {
     }
   }, [isError, error]);
 
+  const hoverBg = useColorModeValue("gray.50", "gray.700");
+
   return (
     <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
       <InputGroup mb={4}>
@@ -100,14 +104,14 @@ export const AccountList: React.FC = () => {
             <Th
               cursor="pointer"
               onClick={() => handleSort("account_name")}
-              _hover={{ bg: "gray.50" }}
+              _hover={{ bg: hoverBg }}
             >
               Account Name {getSortIcon("account_name")}
             </Th>
             <Th
               cursor="pointer"
               onClick={() => handleSort("id")}
-              _hover={{ bg: "gray.50" }}
+              _hover={{ bg: hoverBg }}
             >
               Account Id {getSortIcon("id")}
             </Th>
@@ -115,14 +119,14 @@ export const AccountList: React.FC = () => {
               isNumeric
               cursor="pointer"
               onClick={() => handleSort("balance_cents")}
-              _hover={{ bg: "gray.50" }}
+              _hover={{ bg: hoverBg }}
             >
               Balance {getSortIcon("balance_cents")}
             </Th>
             <Th
               cursor="pointer"
               onClick={() => handleSort("created_at")}
-              _hover={{ bg: "gray.50" }}
+              _hover={{ bg: hoverBg }}
             >
               Created At {getSortIcon("created_at")}
             </Th>
@@ -135,7 +139,7 @@ export const AccountList: React.FC = () => {
               key={account.id}
               onClick={() => navigate(`/accounts/${account.id}`)}
               cursor="pointer"
-              _hover={{ bg: "gray.50" }}
+              _hover={{ bg: hoverBg }}
             >
               <Td>{truncate(account.account_name)}</Td>
               <Td>{account.id}</Td>

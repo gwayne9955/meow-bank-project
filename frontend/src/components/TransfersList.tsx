@@ -1,5 +1,14 @@
 import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
-import { Box, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import {
+  Box,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { FundTransfersApi } from "../api/FundTransfersApi";
@@ -56,6 +65,8 @@ export const TransfersList: React.FC<TransfersListProps> = ({
       FundTransfersApi.getAllForAccount(accountId, { ...sortConfig }),
   });
 
+  const hoverBg = useColorModeValue("gray.50", "gray.700");
+
   return (
     <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
       <Table variant="striped">
@@ -64,7 +75,7 @@ export const TransfersList: React.FC<TransfersListProps> = ({
             <Th
               cursor="pointer"
               onClick={() => handleSort("id")}
-              _hover={{ bg: "gray.50" }}
+              _hover={{ bg: hoverBg }}
             >
               Transfer Id {getSortIcon("id")}
             </Th>
@@ -72,14 +83,14 @@ export const TransfersList: React.FC<TransfersListProps> = ({
             <Th
               cursor="pointer"
               onClick={() => handleSort("from_account")}
-              _hover={{ bg: "gray.50" }}
+              _hover={{ bg: hoverBg }}
             >
               From Account Id {getSortIcon("from_account")}
             </Th>
             <Th
               cursor="pointer"
               onClick={() => handleSort("to_account")}
-              _hover={{ bg: "gray.50" }}
+              _hover={{ bg: hoverBg }}
             >
               To Account Id {getSortIcon("to_account")}
             </Th>
@@ -87,14 +98,14 @@ export const TransfersList: React.FC<TransfersListProps> = ({
               isNumeric
               cursor="pointer"
               onClick={() => handleSort("amount_cents")}
-              _hover={{ bg: "gray.50" }}
+              _hover={{ bg: hoverBg }}
             >
               Amount {getSortIcon("amount_cents")}
             </Th>
             <Th
               cursor="pointer"
               onClick={() => handleSort("created_at")}
-              _hover={{ bg: "gray.50" }}
+              _hover={{ bg: hoverBg }}
             >
               Created At {getSortIcon("created_at")}
             </Th>
