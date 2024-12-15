@@ -15,3 +15,10 @@ Retrieve balances for a given account.
 Retrieve transfer history for a given account.
 
 Please return what you're able to accomplish before Monday at 11:59pm PST.
+
+## Steps to Run
+1. Install docker desktop
+2. From the project root directory, run `docker compose up`
+3. Visit `http://localhost:3000`
+
+<img width="1543" alt="Screenshot 2024-12-14 at 10 21 22 PM" src="https://github.com/user-attachments/assets/279fa21a-96d0-432e-bc03-2a2815738204" />
