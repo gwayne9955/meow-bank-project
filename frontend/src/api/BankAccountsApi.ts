@@ -72,4 +72,22 @@ export const BankAccountsApi = {
     }
     return response.json();
   },
+
+  delete: async (id: number): Promise<BankAccount> => {
+    const url = `http://localhost:8000/api/accounts/${id}`;
+
+    const response = await fetch(url, {
+      method: "DELETE",
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error("API Error Response:", {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorData,
+      });
+      throw new Error(errorData.detail || JSON.stringify(errorData));
+    }
+    return response.json();
+  },
 };

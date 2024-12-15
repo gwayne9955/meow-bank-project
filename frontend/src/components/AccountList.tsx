@@ -10,9 +10,10 @@ import {
   Th,
   Thead,
   Tr,
+  useToast,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDebounce } from "use-debounce";
 import { BankAccountsApi } from "../api/BankAccountsApi";
@@ -23,6 +24,7 @@ import { UiMoney } from "./UiMoney";
 
 export const AccountList: React.FC = () => {
   const navigate = useNavigate();
+  const toast = useToast();
   const [searchTerm, setSearchTerm] = useState<string>();
   const [debouncedSearch] = useDebounce(searchTerm, 300); // 300ms delay
   const [sortConfig, setSortConfig] = useState<SortConfig>({
@@ -57,12 +59,27 @@ export const AccountList: React.FC = () => {
   const {
     data: accounts,
     isLoading,
+    isError,
     error,
   } = useQuery({
     queryKey: ["accounts", sortConfig, debouncedSearch],
     queryFn: () =>
       BankAccountsApi.getAll({ ...sortConfig, query: debouncedSearch }),
+    retry: 0,
   });
+
+  useEffect(() => {
+    if (isError && error) {
+      toast({
+        title: "Failed to get accounts",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+    }
+  }, [isError, error]);
 
   return (
     <Box borderWidth="1px" borderRadius="lg" overflow="hidden">

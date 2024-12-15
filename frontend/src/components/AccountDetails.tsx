@@ -11,8 +11,10 @@ import {
   Spinner,
   Stack,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BankAccountsApi } from "../api/BankAccountsApi";
 import { TransfersList } from "./TransfersList";
@@ -21,10 +23,12 @@ import { UiMoney } from "./UiMoney";
 export const AccountDetails: React.FC = () => {
   const { accountId } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const {
     data: account,
     isLoading,
+    isError,
     error,
   } = useQuery({
     queryKey: ["account", accountId],
@@ -32,8 +36,20 @@ export const AccountDetails: React.FC = () => {
     retry: 0,
   });
 
+  useEffect(() => {
+    if (isError && error) {
+      toast({
+        title: "Failed to get account",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+    }
+  }, [isError, error]);
+
   if (isLoading) return <Spinner />;
-  if (error) return <Text color="red.500">{error.message}</Text>;
   if (!account) return <Text>Account not found!</Text>;
 
   return (
