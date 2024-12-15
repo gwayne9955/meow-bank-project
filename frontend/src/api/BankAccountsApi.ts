@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { BankAccount } from "../types";
+import { BankAccount, SortConfig } from "../types";
 
 export interface CreateAccountForm {
   account_name: string;
@@ -10,8 +10,21 @@ export interface CreateAccountForm {
 }
 
 export const BankAccountsApi = {
-  getAll: async (): Promise<BankAccount[]> => {
-    const response = await fetch("http://localhost:8000/api/accounts/");
+  getAll: async (sortConfig?: SortConfig): Promise<BankAccount[]> => {
+    const params = new URLSearchParams();
+
+    if (sortConfig) {
+      Object.entries(sortConfig).forEach(([key, value]) => {
+        value && params.append(key, value);
+      });
+    }
+
+    var url = "http://localhost:8000/api/accounts/";
+    if (!params.keys().next().done) {
+      url += `?${params}`;
+    }
+
+    const response = await fetch(url);
     if (!response.ok) {
       const errorData = await response.json();
       console.error("API Error Response:", {

@@ -16,3 +16,8 @@ export interface FundTransfer {
   created_at: string;
   notes: string;
 }
+
+export interface SortConfig {
+  sort_by: string;
+  sort_direction?: "asc" | "desc";
+}

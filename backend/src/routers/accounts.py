@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List
+from enum import Enum
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from src.database import get_db
 from src.repositories.bank_account_repo import BankAccountRepo
@@ -21,13 +23,37 @@ def get_account(
 
     return account
 
+class SortColumns(str, Enum):
+    id = "id"
+    account_name = "account_name"
+    balance_cents = "balance_cents"
+    created_at = "created_at"
+
+# Create an enum for sort direction
+class SortDirection(str, Enum):
+    asc = "asc"
+    desc = "desc"
 
 @router.get("/", response_model=List[BankAccountSchema])
 def list_all(
+    sort_by: Optional[SortColumns] = Query(
+        default=SortColumns.id,
+        description="Column to sort by"
+    ),
+    sort_direction: Optional[SortDirection] = Query(
+        default=SortDirection.asc,
+        description="Sort direction"
+    ),
         db: Session = Depends(get_db)
 ):
-    repo = BankAccountRepo(db)
-    return repo.list()
+    try:
+        repo = BankAccountRepo(db)
+        return repo.list(
+            sort_by=sort_by.value,
+            descending=(sort_direction == SortDirection.desc)
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/", response_model=BankAccountSchema)
