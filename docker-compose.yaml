@@ -24,16 +24,16 @@ services:
     volumes:
       - ./backend:/backend
 
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - '3000:3000'
-  #   volumes:
-  #     - ./frontend:/app/frontend
-  #   depends_on:
-  #     - backend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./frontend:/app/frontend
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
