@@ -15,9 +15,10 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { BankAccountsApi, CreateAccountForm } from "../api/BankAccountsApi";
+import { BankAccount } from "../types";
 import { MoneyInput } from "./MoneyInput";
 
 export const CreateAccountButton: React.FC<ButtonProps> = ({ ...rest }) => {
@@ -70,12 +71,17 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
     onClose();
   };
 
-  const onSubmit = async (values: CreateAccountForm) => {
-    try {
-      await BankAccountsApi.create(values);
+  const { mutate, isPending } = useMutation<
+    BankAccount,
+    Error,
+    CreateAccountForm
+  >({
+    mutationFn: (data: CreateAccountForm) => BankAccountsApi.create(data),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
-      handleClose();
-    } catch (error: any) {
+      onClose();
+    },
+    onError: (error) => {
       toast({
         title: "Error",
         description: error.message,
@@ -84,8 +90,8 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
         isClosable: true,
         position: "top",
       });
-    }
-  };
+    },
+  });
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
@@ -99,7 +105,7 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
           <ModalCloseButton />
         </ModalHeader>
         <ModalBody>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit((data) => mutate(data))}>
             <FormControl isInvalid={!!errors.account_name} mb={4}>
               <FormLabel>Account Name</FormLabel>
               <Input
@@ -167,6 +173,7 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
                 mr={3}
                 colorScheme="blue"
                 isLoading={isSubmitting}
+                isDisabled={isPending}
                 type="submit"
               >
                 Create Account

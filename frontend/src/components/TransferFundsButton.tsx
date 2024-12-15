@@ -15,9 +15,10 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { CreateTransferForm, FundTransfersApi } from "../api/FundTransfersApi";
+import { FundTransfer } from "../types";
 import { MoneyInput } from "./MoneyInput";
 
 export const TransferFundsButton: React.FC<ButtonProps> = ({ ...rest }) => {
@@ -65,13 +66,18 @@ const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
     onClose();
   };
 
-  const onSubmit = async (values: CreateTransferForm) => {
-    try {
-      await FundTransfersApi.create(values);
+  const { mutate, isPending } = useMutation<
+    FundTransfer,
+    Error,
+    CreateTransferForm
+  >({
+    mutationFn: (data: CreateTransferForm) => FundTransfersApi.create(data),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
       queryClient.invalidateQueries({ queryKey: ["transfers"] });
-      handleClose();
-    } catch (error: any) {
+      onClose();
+    },
+    onError: (error) => {
       toast({
         title: "Error",
         description: error.message,
@@ -80,8 +86,8 @@ const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
         isClosable: true,
         position: "top",
       });
-    }
-  };
+    },
+  });
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
@@ -95,7 +101,7 @@ const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
           <ModalCloseButton />
         </ModalHeader>
         <ModalBody>
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit((data) => mutate(data))}>
             <FormControl isInvalid={!!errors.from_account} mb={4}>
               <FormLabel>From Account ID</FormLabel>
               <Input
@@ -140,6 +146,7 @@ const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
                 mr={3}
                 colorScheme="blue"
                 isLoading={isSubmitting}
+                isDisabled={isPending}
                 type="submit"
               >
                 Create Transfer
