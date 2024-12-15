@@ -1,7 +1,11 @@
 passlib~=1.7.4
 fastapi~=0.115.6
+fastapi-cors>=0.0.6
 SQLAlchemy~=2.0.36
 python-dotenv~=1.0.1
 uvicorn~=0.32.1
 sqlalchemy-repr==0.1.0
 psycopg2==2.9.10
+DateTime~=5.5
+pydantic~=2.10.3
+starlette~=0.41.3
