@@ -1,5 +1,6 @@
 import {
   Button,
+  ButtonProps,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -10,6 +11,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  ModalOverlay,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
@@ -18,12 +20,12 @@ import { useForm } from "react-hook-form";
 import { CreateTransferForm, FundTransfersApi } from "../api/FundTransfersApi";
 import { MoneyInput } from "./MoneyInput";
 
-export const TransferFundsButton: React.FC = () => {
+export const TransferFundsButton: React.FC<ButtonProps> = ({ ...rest }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <>
-      <Button colorScheme="green" onClick={onOpen}>
+      <Button colorScheme="green" onClick={onOpen} {...rest}>
         Transfer Funds
       </Button>
 
@@ -83,6 +85,10 @@ const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
+      <ModalOverlay
+        bg="blackAlpha.300"
+        backdropFilter="blur(10px)" // This creates the blur effect
+      />
       <ModalContent>
         <ModalHeader>
           Transfer Funds Between Bank Accounts

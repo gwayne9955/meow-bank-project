@@ -1,5 +1,6 @@
 import {
   Button,
+  ButtonProps,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -10,6 +11,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  ModalOverlay,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
@@ -18,12 +20,12 @@ import { useForm } from "react-hook-form";
 import { BankAccountsApi, CreateAccountForm } from "../api/BankAccountsApi";
 import { MoneyInput } from "./MoneyInput";
 
-export const CreateAccountButton: React.FC = () => {
+export const CreateAccountButton: React.FC<ButtonProps> = ({ ...rest }) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
     <>
-      <Button colorScheme="blue" onClick={onOpen}>
+      <Button colorScheme="blue" onClick={onOpen} {...rest}>
         Create Account
       </Button>
 
@@ -87,6 +89,10 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
+      <ModalOverlay
+        bg="blackAlpha.300"
+        backdropFilter="blur(10px)" // This creates the blur effect
+      />
       <ModalContent>
         <ModalHeader>
           Create Account
