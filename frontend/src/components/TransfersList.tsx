@@ -119,8 +119,14 @@ export const TransfersList: React.FC<TransfersListProps> = ({
               <Td>
                 {transfer.from_account === accountId ? "Outbound" : "Inbound"}
               </Td>
-              <Td>{transfer.from_account}</Td>
-              <Td>{transfer.to_account}</Td>
+              <Td>
+                {transfer.from_account === accountId
+                  ? "-"
+                  : transfer.from_account}
+              </Td>
+              <Td>
+                {transfer.to_account === accountId ? "-" : transfer.to_account}
+              </Td>
               <Td isNumeric>
                 <UiMoney cents={transfer.amount_cents} currency={currency} />
               </Td>
