@@ -5,7 +5,7 @@ from src.models.bank_account import BankAccount
 from src.repositories.base import BaseRepository
 from sqlalchemy.exc import SQLAlchemyError
 from src.schemas.bank_account import BankAccountCreate
-from sqlalchemy import or_, desc, asc, String
+from sqlalchemy import or_, desc, asc, String, not_
 
 
 class BankAccountRepo(BaseRepository[BankAccount]):
@@ -51,17 +51,19 @@ class BankAccountRepo(BaseRepository[BankAccount]):
 
     def search(self, query: str = None, sort_by: str = 'id', descending: bool = False):
         """Simulate a search on bank accounts by looking at 2 columns, id and account_name"""
-
-        if query is None:
-            return self.list(sort_by, descending)
-
         try:
-            base_query = self.db.query(self.model).filter(
-                or_(
-                    self.model.id.cast(String) == query,  # Cast id to string for comparison
-                    self.model.account_name.ilike(f"%{query}%")
+            if query is None:
+                base_query = self.db.query(self.model)
+            else:
+                base_query = self.db.query(self.model).filter(
+                    or_(
+                        self.model.id.cast(String) == query,  # Cast id to string for comparison
+                        self.model.account_name.ilike(f"%{query}%")
+                    )
                 )
-            )
+
+            # Filter out deleted accounts
+            base_query = base_query.filter(not_(self.model.deleted))
 
             # Get the column to sort by
             sort_column = getattr(self.model, sort_by, self.model.id)

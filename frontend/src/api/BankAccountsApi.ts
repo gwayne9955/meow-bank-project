@@ -73,7 +73,7 @@ export const BankAccountsApi = {
     return response.json();
   },
 
-  delete: async (id: number): Promise<BankAccount> => {
+  delete: async (id: number): Promise<void> => {
     const url = `http://localhost:8000/api/accounts/${id}`;
 
     const response = await fetch(url, {
@@ -88,6 +88,5 @@ export const BankAccountsApi = {
       });
       throw new Error(errorData.detail || JSON.stringify(errorData));
     }
-    return response.json();
   },
 };

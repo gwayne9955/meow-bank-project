@@ -1,5 +1,6 @@
 import { ChevronLeftIcon } from "@chakra-ui/icons";
 import {
+  Badge,
   Box,
   Button,
   Card,
@@ -17,6 +18,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { BankAccountsApi } from "../api/BankAccountsApi";
+import { DeleteAccountButton } from "./DeleteAccountButton";
 import { TransfersList } from "./TransfersList";
 import { UiMoney } from "./UiMoney";
 
@@ -31,7 +33,7 @@ export const AccountDetails: React.FC = () => {
     isError,
     error,
   } = useQuery({
-    queryKey: ["account", accountId],
+    queryKey: ["accounts"],
     queryFn: () => BankAccountsApi.getById(parseInt(accountId!)),
     retry: 0,
   });
@@ -65,7 +67,25 @@ export const AccountDetails: React.FC = () => {
 
       <Card mb={10} variant="filled">
         <CardHeader>
-          <Heading size="xl">{account.account_name}</Heading>
+          <Flex justify="space-between" align="center">
+            <Heading size="xl">{account.account_name}</Heading>
+            {!account.deleted && (
+              <DeleteAccountButton mr={10} account_id={account.id} />
+            )}
+          </Flex>
+          {account.deleted && (
+            <Badge
+              colorScheme="red"
+              variant="solid"
+              borderRadius="full"
+              fontSize="md"
+              px={4}
+              py={2}
+              mt={5}
+            >
+              Deleted
+            </Badge>
+          )}
         </CardHeader>
         <CardBody>
           <Stack spacing={4}>
