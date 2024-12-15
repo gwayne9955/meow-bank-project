@@ -36,6 +36,10 @@ class SortDirection(str, Enum):
 
 @router.get("/", response_model=List[BankAccountSchema])
 def list_all(
+    query: Optional[str] = Query(
+        default=None,
+        description="Searches either on id or account_name"
+    ),
     sort_by: Optional[SortColumns] = Query(
         default=SortColumns.id,
         description="Column to sort by"
@@ -48,7 +52,8 @@ def list_all(
 ):
     try:
         repo = BankAccountRepo(db)
-        return repo.list(
+        return repo.search(
+            query=query,
             sort_by=sort_by.value,
             descending=(sort_direction == SortDirection.desc)
         )

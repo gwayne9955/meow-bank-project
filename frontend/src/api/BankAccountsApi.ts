@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { BankAccount, SortConfig } from "../types";
+import { BankAccount } from "../types";
 
 export interface CreateAccountForm {
   account_name: string;
@@ -10,11 +10,11 @@ export interface CreateAccountForm {
 }
 
 export const BankAccountsApi = {
-  getAll: async (sortConfig?: SortConfig): Promise<BankAccount[]> => {
+  getAll: async (queryParams?: Object): Promise<BankAccount[]> => {
     const params = new URLSearchParams();
 
-    if (sortConfig) {
-      Object.entries(sortConfig).forEach(([key, value]) => {
+    if (queryParams) {
+      Object.entries(queryParams).forEach(([key, value]) => {
         value && params.append(key, value);
       });
     }

@@ -1,7 +1,19 @@
-import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
-import { Box, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
+import { ChevronDownIcon, ChevronUpIcon, SearchIcon } from "@chakra-ui/icons";
+import {
+  Box,
+  Input,
+  InputGroup,
+  InputLeftElement,
+  Table,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+} from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { useDebounce } from "use-debounce";
 import { BankAccountsApi } from "../api/BankAccountsApi";
 import { SortConfig } from "../types";
 import { truncate } from "../utils/utils";
@@ -9,6 +21,8 @@ import { UiDateTime } from "./UiDateTime";
 import { UiMoney } from "./UiMoney";
 
 export const AccountList: React.FC = () => {
+  const [searchTerm, setSearchTerm] = useState<string>();
+  const [debouncedSearch] = useDebounce(searchTerm, 300); // 300ms delay
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     sort_by: "id", // default sort field
     sort_direction: "asc", // default direction
@@ -43,12 +57,24 @@ export const AccountList: React.FC = () => {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["accounts", sortConfig],
-    queryFn: () => BankAccountsApi.getAll(sortConfig),
+    queryKey: ["accounts", sortConfig, debouncedSearch],
+    queryFn: () =>
+      BankAccountsApi.getAll({ ...sortConfig, query: debouncedSearch }),
   });
 
   return (
     <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
+      <InputGroup mb={4}>
+        <InputLeftElement pointerEvents="none">
+          <SearchIcon color="gray.400" />
+        </InputLeftElement>
+        <Input
+          placeholder="Search accounts by name or id..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </InputGroup>
+
       <Table variant="simple">
         <Thead>
           <Tr>
