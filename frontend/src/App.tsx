@@ -1,16 +1,8 @@
-import {
-  ChakraProvider,
-  Container,
-  Flex,
-  Heading,
-  Image,
-  theme,
-} from "@chakra-ui/react";
+import { ChakraProvider, theme } from "@chakra-ui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AccountList } from "./components/AccountList";
-import { ColorModeSwitcher } from "./components/ColorModeSwitcher";
-import { CreateAccountButton } from "./components/CreateAccountButton";
-import { TransferFundsButton } from "./components/TransferFundsButton";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { AccountDetails } from "./components/AccountDetails";
+import { Home } from "./components/Home";
 
 export const App = () => {
   const queryClient = new QueryClient({
@@ -22,26 +14,15 @@ export const App = () => {
   });
 
   return (
-    <ChakraProvider theme={theme}>
-      <QueryClientProvider client={queryClient}>
-        <Container maxW="container.xl" p={4} mt={20}>
-          <Flex justifyContent="space-between" alignItems="center" mb={6}>
-            <Image
-              src="/cf.jpg"
-              alt="Coin-fidence Logo"
-              boxSize="150px" // or whatever size you need
-              objectFit="contain"
-            />
-            <Heading size="2xl">Coin-fidence Financial</Heading>
-            <ColorModeSwitcher justifySelf="flex-end" />
-            <Flex gap={4}>
-              <CreateAccountButton />
-              <TransferFundsButton />
-            </Flex>
-          </Flex>
-          <AccountList />
-        </Container>
-      </QueryClientProvider>
-    </ChakraProvider>
+    <BrowserRouter>
+      <ChakraProvider theme={theme}>
+        <QueryClientProvider client={queryClient}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/accounts/:accountId" element={<AccountDetails />} />
+          </Routes>
+        </QueryClientProvider>
+      </ChakraProvider>
+    </BrowserRouter>
   );
 };

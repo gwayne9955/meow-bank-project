@@ -1,5 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List
+from enum import Enum
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import List, Optional
 from sqlalchemy.orm import Session
 from src.database import get_db
 from src.exceptions import InsufficientFundsError, CurrencyMismatchException
@@ -10,13 +12,33 @@ from src.services.transfer_service import TransferService
 router = APIRouter()
 
 
+class SortColumns(str, Enum):
+    id = "id"
+    from_account = "from_account"
+    to_account = "to_account"
+    amount_cents = "amount_cents"
+    created_at = "created_at"
+
+# Create an enum for sort direction
+class SortDirection(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
 @router.get("/accounts/{account_id}", response_model=List[FundTransferSchema])
 def list_all_for_account(
         account_id: int,
-        db: Session = Depends(get_db)
-):
+        sort_by: Optional[SortColumns] = Query(
+                default=SortColumns.id,
+                description="Column to sort by"
+            ),
+            sort_direction: Optional[SortDirection] = Query(
+                default=SortDirection.asc,
+                description="Sort direction"
+            ),
+                db: Session = Depends(get_db)
+        ):
     repo = FundTransferRepo(db)
-    return repo.list_for_account(account_id)
+    return repo.list_for_account(account_id, sort_by, sort_direction == SortDirection.desc)
 
 
 @router.post("/", response_model=FundTransferSchema)

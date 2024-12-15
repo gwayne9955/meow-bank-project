@@ -6,6 +6,7 @@ import {
   Input,
   Modal,
   ModalBody,
+  ModalCloseButton,
   ModalContent,
   ModalFooter,
   ModalHeader,
@@ -15,6 +16,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { CreateTransferForm, FundTransfersApi } from "../api/FundTransfersApi";
+import { MoneyInput } from "./MoneyInput";
 
 export const TransferFundsButton: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -46,6 +48,7 @@ const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
     handleSubmit,
     register,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CreateTransferForm>();
 
@@ -54,7 +57,7 @@ const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
     reset({
       from_account: undefined,
       to_account: undefined,
-      amount: undefined,
+      amount_cents: undefined,
       notes: null,
     });
     onClose();
@@ -81,16 +84,24 @@ const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <ModalContent>
-        <ModalHeader>Transfer Funds Between Bank Accounts</ModalHeader>
+        <ModalHeader>
+          Transfer Funds Between Bank Accounts
+          <ModalCloseButton />
+        </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit(onSubmit)}>
             <FormControl isInvalid={!!errors.from_account} mb={4}>
-              <FormLabel>From Account</FormLabel>
+              <FormLabel>From Account ID</FormLabel>
               <Input
                 {...register("from_account", {
                   required: "From account is required",
-                  valueAsNumber: true,
+                  pattern: {
+                    value: /^\d+$/,
+                    message: "IDs must be whole numbers",
+                  },
                 })}
+                type="number"
+                placeholder="1245"
               />
               <FormErrorMessage>
                 {errors.from_account?.message}
@@ -98,38 +109,24 @@ const TransferFundsModal: React.FC<TransferFundsModalProps> = ({
             </FormControl>
 
             <FormControl isInvalid={!!errors.to_account} mb={4}>
-              <FormLabel>To Account</FormLabel>
+              <FormLabel>To Account ID</FormLabel>
               <Input
                 {...register("to_account", {
                   required: "To account is required",
-                  valueAsNumber: true,
+                  pattern: {
+                    value: /^\d+$/,
+                    message: "IDs must be whole numbers",
+                  },
                 })}
+                type="number"
+                placeholder="1245"
               />
               <FormErrorMessage>{errors.to_account?.message}</FormErrorMessage>
             </FormControl>
 
-            <FormControl isInvalid={!!errors.amount} mb={4}>
+            <FormControl isInvalid={!!errors.amount_cents} mb={4}>
               <FormLabel>Amount</FormLabel>
-              <Input
-                type="number"
-                step="0.01"
-                {...register("amount", {
-                  required: "Amount is required",
-                  valueAsNumber: true,
-                  min: {
-                    value: 0.01,
-                    message: "Amount must be greater than 0",
-                  },
-                  validate: {
-                    decimals: (v) =>
-                      !v ||
-                      v * 100 === Math.round(v * 100) ||
-                      "Amount cannot have more than 2 decimal places",
-                  },
-                })}
-                placeholder="1.00"
-              />
-              <FormErrorMessage>{errors.amount?.message}</FormErrorMessage>
+              <MoneyInput name="amount_cents" control={control} isRequired />
             </FormControl>
 
             <ModalFooter>

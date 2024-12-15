@@ -1,30 +1,22 @@
-import { ChevronDownIcon, ChevronUpIcon, SearchIcon } from "@chakra-ui/icons";
-import {
-  Box,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-} from "@chakra-ui/react";
+import { ChevronDownIcon, ChevronUpIcon } from "@chakra-ui/icons";
+import { Box, Table, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useDebounce } from "use-debounce";
-import { BankAccountsApi } from "../api/BankAccountsApi";
+import { FundTransfersApi } from "../api/FundTransfersApi";
 import { SortConfig } from "../types";
 import { truncate } from "../utils/utils";
 import { UiDateTime } from "./UiDateTime";
 import { UiMoney } from "./UiMoney";
 
-export const AccountList: React.FC = () => {
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState<string>();
-  const [debouncedSearch] = useDebounce(searchTerm, 300); // 300ms delay
+export interface TransfersListProps {
+  accountId?: number;
+  currency: string; // They are all in the same currency, thankfully
+}
+
+export const TransfersList: React.FC<TransfersListProps> = ({
+  accountId,
+  currency,
+}) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>({
     sort_by: "id", // default sort field
     sort_direction: "asc", // default direction
@@ -55,52 +47,49 @@ export const AccountList: React.FC = () => {
   };
 
   const {
-    data: accounts,
+    data: transfers,
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["accounts", sortConfig, debouncedSearch],
+    queryKey: ["transfers", sortConfig],
     queryFn: () =>
-      BankAccountsApi.getAll({ ...sortConfig, query: debouncedSearch }),
+      FundTransfersApi.getAllForAccount(accountId, { ...sortConfig }),
   });
 
   return (
     <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
-      <InputGroup mb={4}>
-        <InputLeftElement pointerEvents="none">
-          <SearchIcon color="gray.400" />
-        </InputLeftElement>
-        <Input
-          placeholder="Search accounts by name or id..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </InputGroup>
-
-      <Table variant="simple">
+      <Table variant="striped">
         <Thead>
           <Tr>
-            <Th
-              cursor="pointer"
-              onClick={() => handleSort("account_name")}
-              _hover={{ bg: "gray.50" }}
-            >
-              Account Name {getSortIcon("account_name")}
-            </Th>
             <Th
               cursor="pointer"
               onClick={() => handleSort("id")}
               _hover={{ bg: "gray.50" }}
             >
-              Account Id {getSortIcon("id")}
+              Transfer Id {getSortIcon("id")}
+            </Th>
+            <Th>Type</Th>
+            <Th
+              cursor="pointer"
+              onClick={() => handleSort("from_account")}
+              _hover={{ bg: "gray.50" }}
+            >
+              From Account Id {getSortIcon("from_account")}
+            </Th>
+            <Th
+              cursor="pointer"
+              onClick={() => handleSort("to_account")}
+              _hover={{ bg: "gray.50" }}
+            >
+              To Account Id {getSortIcon("to_account")}
             </Th>
             <Th
               isNumeric
               cursor="pointer"
-              onClick={() => handleSort("balance_cents")}
+              onClick={() => handleSort("amount_cents")}
               _hover={{ bg: "gray.50" }}
             >
-              Balance {getSortIcon("balance_cents")}
+              Amount {getSortIcon("amount_cents")}
             </Th>
             <Th
               cursor="pointer"
@@ -113,25 +102,21 @@ export const AccountList: React.FC = () => {
           </Tr>
         </Thead>
         <Tbody>
-          {accounts?.map((account) => (
-            <Tr
-              key={account.id}
-              onClick={() => navigate(`/accounts/${account.id}`)}
-              cursor="pointer"
-              _hover={{ bg: "gray.50" }}
-            >
-              <Td>{truncate(account.account_name)}</Td>
-              <Td>{account.id}</Td>
+          {transfers?.map((transfer) => (
+            <Tr>
+              <Td>{transfer.id}</Td>
+              <Td>
+                {transfer.from_account === accountId ? "Outbound" : "Inbound"}
+              </Td>
+              <Td>{transfer.from_account}</Td>
+              <Td>{transfer.to_account}</Td>
               <Td isNumeric>
-                <UiMoney
-                  cents={account.balance_cents}
-                  currency={account.currency}
-                />
+                <UiMoney cents={transfer.amount_cents} currency={currency} />
               </Td>
               <Td>
-                <UiDateTime date={new Date(account.created_at)} />
+                <UiDateTime date={new Date(transfer.created_at)} />
               </Td>
-              <Td>{truncate(account.notes)}</Td>
+              <Td>{truncate(transfer.notes)}</Td>
             </Tr>
           ))}
         </Tbody>

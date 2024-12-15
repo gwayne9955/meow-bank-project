@@ -6,6 +6,7 @@ import {
   Input,
   Modal,
   ModalBody,
+  ModalCloseButton,
   ModalContent,
   ModalFooter,
   ModalHeader,
@@ -15,6 +16,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { BankAccountsApi, CreateAccountForm } from "../api/BankAccountsApi";
+import { MoneyInput } from "./MoneyInput";
 
 export const CreateAccountButton: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -46,6 +48,7 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
     handleSubmit,
     register,
     reset,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CreateAccountForm>({
     defaultValues: {
@@ -58,7 +61,7 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
     reset({
       account_name: "",
       customer_id: undefined,
-      balance: undefined,
+      balance_cents: undefined,
       currency: "USD", // Keep the default value
       notes: null,
     });
@@ -85,7 +88,10 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <ModalContent>
-        <ModalHeader>Create Account</ModalHeader>
+        <ModalHeader>
+          Create Account
+          <ModalCloseButton />
+        </ModalHeader>
         <ModalBody>
           <form onSubmit={handleSubmit(onSubmit)}>
             <FormControl isInvalid={!!errors.account_name} mb={4}>
@@ -97,7 +103,12 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
                     value: 2,
                     message: "Minimum length should be 2",
                   },
+                  maxLength: {
+                    value: 255,
+                    message: "Maximum length is 255 characters",
+                  },
                 })}
+                placeholder="Enter name here"
               />
               <FormErrorMessage>
                 {errors.account_name?.message}
@@ -107,35 +118,23 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
             <FormControl isInvalid={!!errors.customer_id} mb={4}>
               <FormLabel>Customer ID</FormLabel>
               <Input
-                type="number"
                 {...register("customer_id", {
                   required: "Customer ID is required",
-                  valueAsNumber: true,
                   min: { value: 1, message: "Customer ID must be positive" },
+                  pattern: {
+                    value: /^\d+$/,
+                    message: "IDs must be whole numbers",
+                  },
                 })}
+                type="number"
+                placeholder="1245"
               />
               <FormErrorMessage>{errors.customer_id?.message}</FormErrorMessage>
             </FormControl>
 
-            <FormControl isInvalid={!!errors.balance} mb={4}>
+            <FormControl isInvalid={!!errors.balance_cents} mb={4}>
               <FormLabel>Initial Balance</FormLabel>
-              <Input
-                type="number"
-                step="0.01"
-                {...register("balance", {
-                  required: "Initial balance is required",
-                  valueAsNumber: true,
-                  min: { value: 0, message: "Balance must be non-negative" },
-                  validate: {
-                    decimals: (v) =>
-                      !v ||
-                      v * 100 === Math.round(v * 100) ||
-                      "Amount cannot have more than 2 decimal places",
-                  },
-                })}
-                placeholder="0.00"
-              />
-              <FormErrorMessage>{errors.balance?.message}</FormErrorMessage>
+              <MoneyInput name="balance_cents" control={control} isRequired />
             </FormControl>
 
             <FormControl isInvalid={!!errors.currency} mb={4}>
@@ -146,7 +145,12 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
             <FormControl isInvalid={!!errors.notes} mb={4}>
               <FormLabel>Notes</FormLabel>
               <Input
-                {...register("notes")}
+                {...register("notes", {
+                  maxLength: {
+                    value: 255,
+                    message: "Notes must be no greater than 255 characters",
+                  },
+                })}
                 placeholder="Optional notes about the account"
               />
               <FormErrorMessage>{errors.notes?.message}</FormErrorMessage>
