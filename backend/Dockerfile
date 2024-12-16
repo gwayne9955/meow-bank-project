@@ -6,10 +6,11 @@ WORKDIR /backend
 COPY requirements.txt .
 
 # Install dependencies
-RUN apk add --no-cache libpq postgresql-libs && \
-    apk add --no-cache --virtual .build-deps gcc musl-dev postgresql-dev python3-dev && \
+RUN apt-get update && \
+    apt-get install -y libpq-dev gcc python3-dev && \
     pip install --no-cache-dir -r requirements.txt && \
-    apk --purge del .build-deps
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy rest of the code
 COPY . .
