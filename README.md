@@ -40,7 +40,7 @@ I built a web application using Python/FastAPI, PostgreSQL, and React/Typescript
 ## Steps to Run
 1. Install docker desktop
 2. Clone this repo
-4. From the project root directory, run `docker build && docker compose up`
+4. From the project root directory, run `docker compose up`
 5. Visit `http://localhost:3000`
 
 <img width="1543" alt="Screenshot 2024-12-14 at 10 21 22 PM" src="https://github.com/user-attachments/assets/279fa21a-96d0-432e-bc03-2a2815738204" />
